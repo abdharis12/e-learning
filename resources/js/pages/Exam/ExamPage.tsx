@@ -261,7 +261,7 @@ export default function ExamPage({ exam, attemptId, answers }: Props) {
                                 >
                                     <span className="relative z-10 flex items-center justify-center gap-3">
                                         <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                        Finish Test
+                                        Selesai Ujian
                                     </span>
                                 </Button>
                             </CardContent>
