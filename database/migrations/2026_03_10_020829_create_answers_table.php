@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('question_id')->constrained()->cascadeOnDelete();
             $table->foreignId('option_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+
+            $table->index(['attempt_id', 'question_id', 'option_id']);
         });
     }
 

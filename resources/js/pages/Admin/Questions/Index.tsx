@@ -1,4 +1,4 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, type FormEvent } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,11 +13,24 @@ import AppLayout from '@/layouts/app-layout';
 import {
     create as questionsCreate,
     index as questionsIndex,
+    destroy as questionsDestroy,
+    edit as questionsEdit,
     importMethod as questionsImport,
 } from '@/routes/questions';
 import type { BreadcrumbItem } from '@/types';
-import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, Database, FileSpreadsheet, Plus, UploadCloud } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ChevronLeft, ChevronRight, Database, FileSpreadsheet, PenIcon, Plus, Trash, UploadCloud } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogCancel,
+    AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 type QuestionItem = {
     id: number;
@@ -170,7 +183,7 @@ export default function QuestionIndex({ questions }: Props) {
                                     <Database size={20} />
                                 </div>
                                 <div>
-                                    <CardTitle className="text-xl font-black text-slate-900">Data Repertoire</CardTitle>
+                                    <CardTitle className="text-xl font-black text-slate-900">Data Bank Soal</CardTitle>
                                     <CardDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
                                         Showing {questions.from} — {questions.to}
                                     </CardDescription>
@@ -187,6 +200,7 @@ export default function QuestionIndex({ questions }: Props) {
                                             <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Module Context</th>
                                             <th className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Question Brief</th>
                                             <th className="px-10 py-5 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Score Weight</th>
+                                            <th className="px-6 py-5 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
@@ -213,6 +227,62 @@ export default function QuestionIndex({ questions }: Props) {
                                                         <Badge className="bg-white border-slate-200 text-slate-900 shadow-sm rounded-lg px-3 py-1 font-black text-[10px]">
                                                             +{question.score}
                                                         </Badge>
+                                                    </td>
+                                                    <td className="px-6 py-6 text-right">
+                                                        <div className="flex justify-end gap-2">
+
+                                                            {/* EDIT */}
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                className="rounded-lg"
+                                                                asChild
+                                                            >
+                                                                <Link href={questionsEdit(question.id)}>
+                                                                    <PenIcon size={14} />
+                                                                </Link>
+                                                            </Button>
+
+                                                            {/* DELETE */}
+                                                            <AlertDialog>
+                                                                <AlertDialogTrigger asChild>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="destructive"
+                                                                        className="rounded-lg"
+                                                                    >
+                                                                        <Trash size={14} />
+                                                                    </Button>
+                                                                </AlertDialogTrigger>
+
+                                                                <AlertDialogContent className="rounded-2xl">
+                                                                    <AlertDialogHeader>
+                                                                        <AlertDialogTitle className="text-lg font-black">
+                                                                            Hapus Soal?
+                                                                        </AlertDialogTitle>
+
+                                                                        <AlertDialogDescription className="text-sm">
+                                                                            Soal yang dihapus tidak dapat dikembalikan.
+                                                                            Semua opsi jawaban juga akan ikut dihapus.
+                                                                        </AlertDialogDescription>
+                                                                    </AlertDialogHeader>
+
+                                                                    <AlertDialogFooter>
+                                                                        <AlertDialogCancel className="rounded-xl">
+                                                                            Batal
+                                                                        </AlertDialogCancel>
+
+                                                                        <AlertDialogAction
+                                                                            onClick={() => router.delete(questionsDestroy(question.id).url)}
+                                                                            className="bg-red-600 hover:bg-red-700 rounded-xl"
+                                                                        >
+                                                                            Ya, Hapus
+                                                                        </AlertDialogAction>
+                                                                    </AlertDialogFooter>
+                                                                </AlertDialogContent>
+                                                            </AlertDialog>
+
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))

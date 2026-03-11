@@ -5,6 +5,7 @@ import {
     ClipboardList,
     FileText,
     LayoutGrid,
+    MonitorCheck,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -19,6 +20,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import {
+    adminExamMonitor,
     adminExamsIndex,
     adminResultsIndex,
     dashboard,
@@ -58,6 +60,11 @@ export function AppSidebar() {
                 title: 'Hasil Ujian',
                 href: adminResultsIndex(),
                 icon: BarChart3,
+            },
+            {
+                title: 'Monitoring Ujian',
+                href: adminExamMonitor(),
+                icon: MonitorCheck,
             },
         ]
         : [

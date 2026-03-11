@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminQuestionController;
 use App\Http\Controllers\AdminExamAssignmentController;
 use App\Http\Controllers\AdminExamController;
+use App\Http\Controllers\AdminExamMonitorController;
 use App\Http\Controllers\AdminResultController;
 use App\Http\Controllers\AnswerController;
 use App\Http\Controllers\ExamController;
@@ -55,6 +56,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('questions.import');
 
         Route::resource('admin/questions', AdminQuestionController::class);
+
+        Route::get('/admin/exam-monitor', [AdminExamMonitorController::class, 'index'])->name('adminExamMonitor');
     });
 });
 

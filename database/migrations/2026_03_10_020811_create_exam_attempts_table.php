@@ -20,6 +20,8 @@ return new class extends Migration
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
             $table->timestamps();
+
+            $table->index(['user_id', 'exam_id']);
         });
     }
 

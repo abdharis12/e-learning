@@ -48,7 +48,8 @@ class AdminQuestionController extends Controller
     {
         $question = Question::create([
             'exam_id' => $request->exam_id,
-            'question_text' => $request->question_text
+            'question_text' => $request->question_text,
+            'score' => $request->score
         ]);
 
         foreach ($request->options as $opt) {
@@ -56,11 +57,12 @@ class AdminQuestionController extends Controller
             Option::create([
                 'question_id' => $question->id,
                 'option_text' => $opt['text'],
+                'score' => $opt['correct'] ? $request->score : 0,
                 'is_correct' => $opt['correct']
             ]);
         }
 
-        return redirect()->route('questions.index');
+        return redirect()->route('questions.index')->with('success', 'Soal berhasil dibuat.');
     }
 
     public function import(ImportQuestionsRequest $request): RedirectResponse
@@ -85,30 +87,61 @@ class AdminQuestionController extends Controller
      */
     public function show(string $id)
     {
-        //
+        abort(404);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Question $question)
     {
-        //
+        $question->load('options');
+
+        $exams = Exam::pluck('title', 'id');
+
+        return Inertia::render('Admin/Questions/Edit', [
+            'question' => $question,
+            'exams' => $exams
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Question $question): RedirectResponse
     {
-        //
+        $question->update([
+            'exam_id' => $request->exam_id,
+            'question_text' => $request->question_text,
+            'score' => $request->score,
+        ]);
+
+        $question->options()->delete();
+
+        foreach ($request->options as $opt) {
+            Option::create([
+                'question_id' => $question->id,
+                'option_text' => $opt['text'],
+                'score' => $opt['correct'] ? $request->score : 0,
+                'is_correct' => $opt['correct']
+            ]);
+        }
+
+        return redirect()
+            ->route('questions.index')
+            ->with('success', 'Soal berhasil diperbarui.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Question $question): RedirectResponse
     {
-        //
+        $question->options()->delete();
+        $question->delete();
+
+        return redirect()
+            ->route('questions.index')
+            ->with('success', 'Soal berhasil dihapus.');
     }
 }

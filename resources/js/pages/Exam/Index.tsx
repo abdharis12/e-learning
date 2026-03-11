@@ -11,6 +11,7 @@ import AppLayout from '@/layouts/app-layout';
 import { examsIndex, examsStart } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import { Clock, BookOpen, Calendar, ArrowRight, Sparkles } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 type Exam = {
     id: number;
@@ -47,7 +48,6 @@ export default function ExamIndex({ exams }: Props) {
     };
 
     const startExam = (examId: number) => {
-        if (!confirm('Mulai ujian sekarang? Pastikan koneksi internet stabil.')) return;
         router.post(examsStart(examId).url);
     };
 
@@ -130,22 +130,45 @@ export default function ExamIndex({ exams }: Props) {
                                     </p>
                                 </div>
 
-                                <Button
-                                    onClick={() => startExam(exam.id)}
-                                    disabled={!exam.can_start}
-                                    className={`h-16 w-full rounded-[1.8rem] text-sm font-black transition-all duration-300 group-hover:gap-4 ${exam.can_start
-                                        ? 'bg-slate-900 text-white hover:bg-emerald-600 shadow-xl shadow-slate-200'
-                                        : 'bg-slate-50 text-slate-300 border border-slate-100 pointer-events-none'
-                                        }`}
-                                >
-                                    {exam.can_start ? (
-                                        <>
-                                            MULAI SEKARANG <ArrowRight size={18} className="stroke-[3px]" />
-                                        </>
-                                    ) : (
-                                        'BELUM TERSEDIA'
-                                    )}
-                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            disabled={!exam.can_start}
+                                            className={`h-16 w-full rounded-[1.8rem] text-sm font-black transition-all duration-300 group-hover:gap-4 ${exam.can_start
+                                                ? 'bg-slate-900 text-white hover:bg-emerald-600 shadow-xl shadow-slate-200 cursor-pointer'
+                                                : 'bg-slate-50 text-slate-300 border border-slate-100 pointer-events-none'
+                                                }`}
+                                        >
+                                            {exam.can_start ? (
+                                                <>
+                                                    MULAI UJIAN SEKARANG <ArrowRight size={18} className="stroke-[3px]" />
+                                                </>
+                                            ) : (
+                                                'BELUM TERSEDIA'
+                                            )}
+                                        </Button>
+                                    </AlertDialogTrigger>
+
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Apakah Anda sudah siap untuk mulai ujian?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Anda akan memulai ujian <strong>{exam.title}</strong>.
+                                                Pastikan koneksi internet stabil dan Anda tidak menutup halaman ujian selama berlangsung.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={() => startExam(exam.id)}
+                                                className="bg-emerald-600 hover:bg-emerald-700"
+                                            >
+                                                Ya, Mulai Ujian
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </CardContent>
                         </Card>
                     ))}

@@ -13,7 +13,8 @@ class AdminResultController extends Controller
         $results = ExamAttempt::query()
             ->with(['user:id,name', 'exam:id,title'])
             ->whereNotNull('finished_at')
-            ->latest('finished_at')
+            ->orderByDesc('score')
+            ->orderBy('finished_at')
             ->paginate(10);
 
         return Inertia::render('Admin/Results/Index', [

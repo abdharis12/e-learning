@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Timer from '@/components/timer';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +22,17 @@ import {
     BadgeCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogCancel,
+    AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 type ExamOption = {
     id: number;
@@ -45,9 +56,10 @@ interface Props {
     exam: ExamData;
     attemptId: number;
     answers: Record<string, number>;
+    startedAt: string;
 }
 
-export default function ExamPage({ exam, attemptId, answers }: Props) {
+export default function ExamPage({ exam, attemptId, answers, startedAt }: Props) {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] =
         useState<Record<string, number>>(answers);
@@ -63,6 +75,91 @@ export default function ExamPage({ exam, attemptId, answers }: Props) {
         [exam.title],
     );
 
+    // Lock the exam in localStorage when the component mounts
+    React.useEffect(() => {
+
+        const key = `exam-lock-${attemptId}`
+
+        if (localStorage.getItem(key)) {
+
+            alert("Ujian sudah terbuka di tab lain.")
+
+            router.visit(examsIndex().url)
+
+            return
+        }
+
+        localStorage.setItem(key, "active")
+
+        const handleUnload = () => {
+            localStorage.removeItem(key)
+        }
+
+        window.addEventListener("beforeunload", handleUnload)
+
+        return () => {
+            localStorage.removeItem(key)
+            window.removeEventListener("beforeunload", handleUnload)
+        }
+
+    }, [attemptId])
+
+    // Listen for storage events to detect if the exam is opened in another tab
+    useEffect(() => {
+
+        const key = `exam-lock-${attemptId}`
+
+        const handleStorage = (event: StorageEvent) => {
+
+            if (event.key === key) {
+
+                alert("Ujian dibuka di tab lain.")
+
+                router.visit(examsIndex().url)
+            }
+        }
+
+        window.addEventListener("storage", handleStorage)
+
+        return () => window.removeEventListener("storage", handleStorage)
+
+    }, [attemptId])
+
+    // Prevent back navigation during the exam
+    useEffect(() => {
+
+        history.pushState(null, "", location.href)
+
+        window.onpopstate = () => {
+            history.go(1)
+        }
+
+    }, [])
+
+    // Prevent the user from leaving the page accidentally
+    useEffect(() => {
+
+        const handler = (e: BeforeUnloadEvent) => {
+            e.preventDefault()
+            e.returnValue = ""
+        }
+
+        window.addEventListener("beforeunload", handler)
+
+        return () => window.removeEventListener("beforeunload", handler)
+
+    }, [])
+
+    // Calculate the exam deadline based on the startedAt time and exam duration
+    const deadline = useMemo(() => {
+
+        const start = new Date(startedAt).getTime()
+
+        return start + exam.duration_minutes * 60 * 1000
+
+    }, [startedAt, exam.duration_minutes])
+
+    // Handle answer selection and synchronization with the server
     const answerQuestion = (optionId: number): void => {
         const questionKey = String(currentQuestion.id);
         setSelectedAnswers((previous) => ({
@@ -87,8 +184,6 @@ export default function ExamPage({ exam, attemptId, answers }: Props) {
     };
 
     const submitExam = (): void => {
-        if (!confirm('Yakin ingin mengumpulkan ujian sekarang?')) return;
-
         router.post(examsSubmit(attemptId).url, {}, {
             onStart: () => {
                 toast.loading('Mengirim hasil ujian...', { id: 'submit-exam' });
@@ -145,7 +240,7 @@ export default function ExamPage({ exam, attemptId, answers }: Props) {
                         <div className="flex flex-col">
                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Time Remaining</span>
                             <div className="font-black text-xl text-slate-900 tabular-nums leading-none">
-                                <Timer duration={exam.duration_minutes * 60} attemptId={attemptId} />
+                                <Timer deadline={deadline} attemptId={attemptId} />
                             </div>
                         </div>
                     </div>
@@ -255,15 +350,49 @@ export default function ExamPage({ exam, attemptId, answers }: Props) {
                                     })}
                                 </div>
 
-                                <Button
-                                    onClick={submitExam}
-                                    className="w-full h-16 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-emerald-500/20 transition-all border-none group relative overflow-hidden"
-                                >
-                                    <span className="relative z-10 flex items-center justify-center gap-3">
-                                        <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                        Selesai Ujian
-                                    </span>
-                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            className="w-full h-16 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-emerald-500/20 transition-all border-none group relative overflow-hidden"
+                                        >
+                                            <span className="relative z-10 flex items-center justify-center gap-3">
+                                                <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                                Selesai Ujian
+                                            </span>
+                                        </Button>
+                                    </AlertDialogTrigger>
+
+                                    <AlertDialogContent className="rounded-2xl">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle className="text-lg font-black">
+                                                Selesaikan Ujian?
+                                            </AlertDialogTitle>
+
+                                            <AlertDialogDescription className="text-sm leading-relaxed">
+                                                Setelah ujian dikumpulkan:
+                                                <br />
+                                                • Anda tidak dapat mengubah jawaban
+                                                <br />
+                                                • Semua jawaban akan langsung direkap
+                                                <br />
+                                                • Waktu ujian akan dihentikan
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className="rounded-xl">
+                                                Batal
+                                            </AlertDialogCancel>
+
+                                            <AlertDialogAction
+                                                onClick={submitExam}
+                                                className="bg-emerald-600 hover:bg-emerald-700 rounded-xl cursor-pointer"
+                                            >
+                                                Ya, Selesaikan
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </CardContent>
 
                             {/* Decorative Text */}
