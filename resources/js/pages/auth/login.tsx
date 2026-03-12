@@ -153,8 +153,8 @@ export default function Login({
                         <ShieldCheck size={14} className="text-emerald-500" />
                         <span className="text-[10px] text-slate-400 tracking-[0.2em] font-bold uppercase">Authorized Access Only</span>
                     </div>
-                    <p className="text-[9px] text-slate-500 tracking-wider">
-                        Diskominfo Kabupaten Muara Enim
+                    <p className="text-sm text-slate-500 tracking-wider">
+                        DISKOMINFO Kabupaten Muara Enim
                     </p>
                 </div>
             </div>

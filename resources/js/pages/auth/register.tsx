@@ -29,7 +29,7 @@ export default function Register() {
                     </div>
                     <h2 className="text-3xl font-black text-white tracking-tight">Buat Akun</h2>
                     <p className="text-slate-400 text-sm mt-2 font-medium">
-                        Seleksi Tenaga Ahli IT <br />
+                        Portal Ujian Tenaga Ahli <br />
                         <span className="text-emerald-400">Kab. Muara Enim</span>
                     </p>
                 </div>
@@ -136,11 +136,16 @@ export default function Register() {
                     </Form>
                 </div>
 
-                {/* Footer Info */}
-                <p className="text-center text-[10px] text-slate-600 mt-8 uppercase tracking-[0.2em] font-bold">
-                    Secure Registration System <br />
-                    Diskominfo Muara Enim
-                </p>
+                {/* Secure Footer */}
+                <div className="mt-8 flex flex-col items-center gap-2 opacity-40">
+                    <div className="flex items-center gap-2">
+                        <ShieldCheck size={14} className="text-emerald-500" />
+                        <span className="text-[10px] text-slate-400 tracking-[0.2em] font-bold uppercase">Secure Registration System</span>
+                    </div>
+                    <p className="text-sm text-slate-500 tracking-wider">
+                        DISKOMINFO Kabupaten Muara Enim
+                    </p>
+                </div>
             </div>
         </div>
     );

@@ -160,7 +160,7 @@ export default function Welcome({
                         Status: ME-Active
                     </span>
                     <span className="text-slate-800">/</span>
-                    <span>System v2.6.0</span>
+                    <span>AHDA Dev | v1.0.0</span>
                 </div>
             </footer>
         </div>
