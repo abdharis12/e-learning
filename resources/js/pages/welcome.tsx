@@ -1,3 +1,4 @@
+import GuideModal from '@/components/guide-modal';
 import { dashboard, login, register } from '@/routes';
 import { Link, usePage } from '@inertiajs/react';
 import {
@@ -9,6 +10,7 @@ import {
     Server,
     ShieldCheck
 } from 'lucide-react';
+import { useState } from 'react';
 
 interface Props {
     auth: {
@@ -23,6 +25,8 @@ export default function Welcome({
     canRegister?: boolean;
 }) {
     const { auth } = usePage<Props>().props;
+
+    const [openGuide, setOpenGuide] = useState(false);
 
     return (
         <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-emerald-500/30">
@@ -104,7 +108,10 @@ export default function Welcome({
                                 {auth.user ? "Lanjutkan Sesi" : "Mulai Sekarang"}
                                 <ArrowRight size={18} />
                             </Link>
-                            <button className="px-10 py-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 text-white rounded-2xl font-bold transition-all backdrop-blur-sm">
+                            <button
+                                onClick={() => setOpenGuide(true)}
+                                className="cursor-pointer px-10 py-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 text-white rounded-2xl font-bold transition-all backdrop-blur-sm"
+                            >
                                 Petunjuk Teknis
                             </button>
                         </div>
@@ -163,6 +170,12 @@ export default function Welcome({
                     <span>AHDA Dev | v1.0.0</span>
                 </div>
             </footer>
+
+            {/* Guide Modal */}
+            <GuideModal
+                open={openGuide}
+                onClose={() => setOpenGuide(false)}
+            />
         </div>
     );
 }
