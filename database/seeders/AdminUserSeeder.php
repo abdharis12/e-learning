@@ -18,7 +18,7 @@ class AdminUserSeeder extends Seeder
             ['email' => 'admin@dpmptsp.muaraenimkab.go.id'],
             [
                 'name' => 'Admin',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Dpmptsp@1234'),
                 'role' => UserRole::Admin,
                 'email_verified_at' => now(),
             ],

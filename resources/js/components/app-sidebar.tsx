@@ -3,6 +3,7 @@ import {
     BarChart3,
     BookOpen,
     ClipboardList,
+    FileInput,
     FileText,
     LayoutGrid,
     MonitorCheck,
@@ -20,11 +21,13 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import {
+    adminDocumentsIndex,
     adminExamMonitor,
     adminExamsIndex,
     adminResultsIndex,
     dashboard,
     examsIndex,
+    participantIndex,
     participantResultsIndex,
 } from '@/routes';
 import { index as questionsIndex } from '@/routes/questions';
@@ -66,6 +69,11 @@ export function AppSidebar() {
                 href: adminExamMonitor(),
                 icon: MonitorCheck,
             },
+            {
+                title: 'Persyaratan',
+                href: participantIndex(),
+                icon: FileInput,
+            },
         ]
         : [
             {
@@ -77,6 +85,11 @@ export function AppSidebar() {
                 title: 'Hasil Ujian',
                 href: participantResultsIndex(),
                 icon: BarChart3,
+            },
+            {
+                title: 'Persyaratan',
+                href: participantIndex(),
+                icon: FileInput,
             },
         ];
 

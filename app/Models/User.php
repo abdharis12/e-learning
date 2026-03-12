@@ -68,4 +68,9 @@ class User extends Authenticatable
     {
         return $this->role === UserRole::Peserta;
     }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ParticipantDocument::class);
+    }
 }
