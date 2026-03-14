@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
+use App\Exports\ParticipantsExport;
 use App\Http\Requests\StoreParticipantDocumentRequest;
 use App\Models\ParticipantDocument;
 use App\Models\User;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ParticipantDocumentController extends Controller
 {
@@ -19,34 +21,34 @@ class ParticipantDocumentController extends Controller
         $user = auth()->user();
 
         if ($user->role === UserRole::Admin) {
-
-            $participants = User::with('documents')
+            $participants = User::select('id', 'name', 'email')
+                ->with('documents:id,user_id,document_type')
                 ->where('role', UserRole::Peserta->value)
                 ->latest()
-                ->get()
-                ->map(function ($user) {
-                    return [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'documents' => $user->documents,
-                    ];
-                });
+                ->paginate(10)
+                ->through(fn($user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'documents' => $user->documents,
+                ]);
         } else {
 
             $participants = User::with('documents')
                 ->where('id', $user->id)
-                ->get()
-                ->map(function ($user) {
+                ->paginate(10)
+                ->through(function ($user) {
                     return [
                         'id' => $user->id,
                         'name' => $user->name,
+                        'email' => $user->email,
                         'documents' => $user->documents,
                     ];
                 });
         }
 
         return Inertia::render('Participant/Index', [
-            'participants' => $participants,
+            'participants' => $participants
         ]);
     }
 
@@ -178,5 +180,10 @@ class ParticipantDocumentController extends Controller
         }
 
         return back()->with('success', 'Semua dokumen peserta berhasil dihapus');
+    }
+
+    public function export()
+    {
+        return Excel::download(new ParticipantsExport, 'peserta.xlsx');
     }
 }

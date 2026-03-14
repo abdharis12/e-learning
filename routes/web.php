@@ -49,7 +49,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/questions/import', [AdminQuestionController::class, 'import'])->name('questions.import');
         Route::resource('admin/questions', AdminQuestionController::class);
         Route::get('/admin/exam-monitor', [AdminExamMonitorController::class, 'index'])->name('adminExamMonitor');
+
+        // Participant Export data
+        Route::get('/participants/export', [ParticipantDocumentController::class, 'export'])->name('participantsExport');
     });
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';

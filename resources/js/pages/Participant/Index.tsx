@@ -1,4 +1,4 @@
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import AppLayout from "@/layouts/app-layout";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,11 +7,13 @@ import {
     CloudUpload,
     Users,
     Files,
-    Search
+    Search,
+    Mail
 } from "lucide-react";
-import { participantCreate, participantDocumentDestroy, participantDocumentsShow, participantIndex } from "@/routes";
+import { participantCreate, participantDocumentDestroy, participantDocumentsShow, participantIndex, participantsExport } from "@/routes";
 import { toast } from "sonner";
 import { BreadcrumbItem } from "@/types/navigation";
+import { UserRole } from "@/enums/user-role";
 
 interface Document {
     document_type: string;
@@ -20,11 +22,37 @@ interface Document {
 interface Participant {
     id: number;
     name: string;
+    email: string;
     documents: Document[];
 }
 
+interface PaginationLink {
+    url: string | null
+    label: string
+    active: boolean
+}
+
+interface Pagination<T> {
+    data: T[]
+    links: PaginationLink[]
+    from: number | null
+}
+
+interface AuthUser {
+    id: number
+    name: string
+    email: string
+    role: string
+}
+
+interface PageProps {
+    auth: {
+        user: AuthUser
+    }
+}
+
 interface Props {
-    participants: Participant[];
+    participants: Pagination<Participant>
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -35,6 +63,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Index({ participants }: Props) {
+
+    const { auth } = usePage<PageProps>().props;
 
     const destroy = (id: number) => {
         toast("Hapus data peserta?", {
@@ -82,28 +112,49 @@ export default function Index({ participants }: Props) {
                         </p>
                     </div>
 
-                    <Button asChild className="px-8 rounded-[1.5rem] bg-slate-900 text-white hover:bg-emerald-600 shadow-2xl shadow-slate-200 font-black text-xs uppercase tracking-[0.2em] transition-all duration-500 group">
-                        <Link href={participantCreate()}>
-                            <CloudUpload size={18} className="mr-3 group-hover:-translate-y-1 transition-transform" />
-                            Upload Persyaratan
-                        </Link>
-                    </Button>
+                    <div className="flex gap-3">
+                        {auth.user.role === UserRole.Admin && (
+                            <Button
+                                onClick={() => window.location.href = participantsExport().url}
+                                className="bg-emerald-500 text-white rounded-4xl px-8"
+                            >
+                                <Files size={18} />
+                                Export Excel
+                            </Button>
+                        )}
+
+                        <Button asChild className="px-8 rounded-[1.5rem] bg-slate-900 text-white">
+                            <Link href={participantCreate()}>
+                                <CloudUpload size={18} />
+                                Upload Persyaratan
+                            </Link>
+                        </Button>
+
+                    </div>
                 </header>
 
-                {/* Table Repertoire */}
                 <div className="overflow-hidden rounded-[3rem] bg-white ring-1 ring-slate-100 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]">
                     <table className="w-full border-collapse">
                         <thead>
-                            <tr className="bg-slate-50/50 border-b border-slate-50">
-                                <th className="px-10 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Candidate Name</th>
-                                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Asset Count</th>
-                                <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Management</th>
+                            <tr className="bg-emerald-50/50 border-b border-slate-50">
+                                <th className="px-10 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">No</th>
+                                <th className="px-10 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Nama Peserta</th>
+                                <th className="px-10 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Email Peserta</th>
+                                <th className="px-6 py-6 text-left text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Berkas Upload</th>
+                                <th className="px-10 py-6 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
-                            {participants.length > 0 ? (
-                                participants.map((user) => (
+                            {participants.data.length > 0 ? (
+                                participants.data.map((user, index) => (
                                     <tr key={user.id} className="group hover:bg-slate-50/30 transition-colors">
+                                        <td className="px-10 py-7">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-bold text-slate-600 tabular-nums">
+                                                    {(participants.from ?? 0) + index}
+                                                </span>
+                                            </div>
+                                        </td>
                                         <td className="px-10 py-7">
                                             <div className="flex items-center gap-4">
                                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all duration-500">
@@ -111,6 +162,17 @@ export default function Index({ participants }: Props) {
                                                 </div>
                                                 <div>
                                                     <p className="text-base font-black text-slate-900 tracking-tight">{user.name}</p>
+                                                    <p className="text-[10px] font-bold uppercase text-emerald-500 tracking-tighter">Verified Identity</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-10 py-7">
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all duration-500">
+                                                    <Mail size={20} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-base font-black text-slate-900 tracking-tight">{user.email}</p>
                                                     <p className="text-[10px] font-bold uppercase text-emerald-500 tracking-tighter">Verified Identity</p>
                                                 </div>
                                             </div>
@@ -145,8 +207,8 @@ export default function Index({ participants }: Props) {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={3} className="px-10 py-24 text-center">
-                                        <div className="flex flex-col items-center gap-4 opacity-20">
+                                    <td colSpan={5} className="px-10 py-24 text-center">
+                                        <div className="flex flex-col items-center justify-center gap-4 opacity-20">
                                             <Search size={48} strokeWidth={1} />
                                             <p className="text-xs font-black uppercase tracking-[0.3em]">No Participant Records</p>
                                         </div>
@@ -155,6 +217,23 @@ export default function Index({ participants }: Props) {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="flex justify-end gap-2 mt-10">
+                    {participants.links.map((link, index) => (
+                        <button
+                            key={index}
+                            disabled={!link.url}
+                            onClick={() => link.url && router.visit(link.url)}
+                            className={`px-4 py-2 rounded-lg text-sm font-bold
+                                    ${link.active
+                                    ? "bg-emerald-500 text-white"
+                                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                }`}
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                    ))}
                 </div>
 
                 {/* Minimalist Footer */}

@@ -78,7 +78,26 @@ export default function DocumentIndex() {
                     <input
                         type="file"
                         accept={accept}
-                        onChange={(e) => form.setData(field, e.target.files?.[0] ?? null)}
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+
+                            const maxSize = 5 * 1024 * 1024;
+
+                            if (file.size > maxSize) {
+                                toast.error("Ukuran file maksimal 5MB");
+                                e.target.value = "";
+                                return;
+                            }
+
+                            if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+                                toast.error("Format file tidak valid");
+                                e.target.value = "";
+                                return;
+                            }
+
+                            form.setData(field, file);
+                        }}
                         className="absolute inset-0 cursor-pointer opacity-0"
                     />
                 </div>
@@ -119,7 +138,7 @@ export default function DocumentIndex() {
 
                             <UploadItem label="Surat Lamaran & CV" field="cv" icon={FileText} accept=".pdf" helperText="PDF (Max 5MB)" />
                             <UploadItem label="Ijazah & Transkrip" field="ijazah" icon={GraduationCap} accept=".pdf" helperText="PDF (Max 5MB)" />
-                            <UploadItem label="Pas Foto Terbaru" field="foto" icon={ImageIcon} accept="image/*,.pdf" helperText="JPG, JPEG, PNG, PDF (Max 2MB)" />
+                            <UploadItem label="Pas Foto Terbaru" field="foto" icon={ImageIcon} accept="image/*,.pdf" helperText="JPG, JPEG, PNG, PDF (Max 5MB)" />
                             <UploadItem label="Sertifikat Keahlian" field="sertifikat" icon={Award} accept=".pdf" helperText="PDF (Max 5MB)" />
                             <UploadItem label="Identitas (KTP)" field="ktp" icon={UserCircle} accept="image/*,.pdf" helperText="JPG, JPEG, PNG, PDF (Max 5MB)" />
 
