@@ -20,7 +20,9 @@ import {
     ChevronRight,
     LayoutGrid,
     HelpCircle,
-    BadgeCheck
+    BadgeCheck,
+    XCircle,
+    CheckCircle2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -328,10 +330,10 @@ export default function ExamPage({ exam, attemptId, answers, startedAt }: Props)
                                         </span>
                                         <div className="flex flex-col gap-1">
                                             <Badge variant="secondary" className="w-fit text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30">
-                                                ✓ {Object.keys(selectedAnswers).length} soal terjawab
+                                                <CheckCircle2 size={10} className='mr-1' /> {Object.keys(selectedAnswers).length} soal terjawab
                                             </Badge>
                                             <Badge variant="outline" className="w-fit text-[10px] font-bold bg-rose-500/20 border-rose-600 text-rose-400 hover:bg-rose-500/30">
-                                                𝐗 {questions.length - Object.keys(selectedAnswers).length} soal belum dijawab
+                                                <XCircle size={10} className='mr-1' /> {questions.length - Object.keys(selectedAnswers).length} soal belum dijawab
                                             </Badge>
                                         </div>
                                     </div>
