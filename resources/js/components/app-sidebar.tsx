@@ -1,16 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
-    BarChart3,
-    BookOpen,
-    ClipboardList,
-    FileInput,
-    FileText,
     LayoutGrid,
-    MonitorCheck,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
+import { NavMainManagementExam } from '@/components/nav-main-management-exam';
 import { NavUser } from '@/components/nav-user';
+import { adminExamMenus, participantExamMenus } from '@/components/menu-sidebar';
 import {
     Sidebar,
     SidebarContent,
@@ -21,77 +17,27 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import {
-    adminDocumentsIndex,
-    adminExamMonitor,
-    adminExamsIndex,
-    adminResultsIndex,
     dashboard,
     examsIndex,
-    participantIndex,
-    participantResultsIndex,
 } from '@/routes';
-import { index as questionsIndex } from '@/routes/questions';
 import type { NavItem } from '@/types';
+import { UserRole } from '@/enums/user-role';
 
 export function AppSidebar() {
     const { auth } = usePage().props;
-    const isAdmin = auth.user.role === 'admin';
+    const isAdmin = auth.user.role === UserRole.Admin;
 
-    const mainNavItems: NavItem[] = isAdmin
-        ? [
-            {
-                title: 'Dashboard',
-                href: dashboard(),
-                icon: LayoutGrid,
-            },
-            {
-                title: 'Kelola Ujian',
-                href: adminExamsIndex(),
-                icon: ClipboardList,
-            },
-            {
-                title: 'Bank Soal',
-                href: questionsIndex(),
-                icon: FileText,
-            },
-            {
-                title: 'Ujian',
-                href: examsIndex(),
-                icon: BookOpen,
-            },
-            {
-                title: 'Hasil Ujian',
-                href: adminResultsIndex(),
-                icon: BarChart3,
-            },
-            {
-                title: 'Monitoring Ujian',
-                href: adminExamMonitor(),
-                icon: MonitorCheck,
-            },
-            {
-                title: 'Persyaratan',
-                href: participantIndex(),
-                icon: FileInput,
-            },
-        ]
-        : [
-            {
-                title: 'Ujian',
-                href: examsIndex(),
-                icon: BookOpen,
-            },
-            {
-                title: 'Hasil Ujian',
-                href: participantResultsIndex(),
-                icon: BarChart3,
-            },
-            {
-                title: 'Persyaratan',
-                href: participantIndex(),
-                icon: FileInput,
-            },
-        ];
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+    ];
+
+    const managementExamNavItems = isAdmin
+        ? adminExamMenus
+        : participantExamMenus;
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -112,6 +58,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <NavMainManagementExam groups={managementExamNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

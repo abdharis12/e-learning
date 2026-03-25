@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import Timer from '@/components/timer';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
     Card,
     CardContent,
@@ -321,15 +322,25 @@ export default function ExamPage({ exam, attemptId, answers, startedAt }: Props)
                                     <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] opacity-50">Navigation Map</CardTitle>
                                 </div>
                                 <div className="flex items-end justify-between">
-                                    <span className="text-4xl font-black tracking-tighter tabular-nums">
-                                        {Object.keys(selectedAnswers).length} / {questions.length}
-                                    </span>
-                                    <span className="text-[10px] font-bold opacity-30 uppercase tracking-[0.2em] mb-1">Answered</span>
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-4xl font-black tracking-tighter tabular-nums">
+                                            {Object.keys(selectedAnswers).length} / {questions.length}
+                                        </span>
+                                        <div className="flex flex-col gap-1">
+                                            <Badge variant="secondary" className="w-fit text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30">
+                                                ✓ {Object.keys(selectedAnswers).length} soal terjawab
+                                            </Badge>
+                                            <Badge variant="outline" className="w-fit text-[10px] font-bold bg-rose-500/20 border-rose-600 text-rose-400 hover:bg-rose-500/30">
+                                                𝐗 {questions.length - Object.keys(selectedAnswers).length} soal belum dijawab
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] font-bold opacity-30 uppercase tracking-[0.2em] mb-1">Progress</span>
                                 </div>
                             </CardHeader>
 
                             <CardContent className="p-8 pt-4 space-y-8 relative z-10 flex-1 flex flex-col justify-between">
-                                <div className="grid grid-cols-4 gap-3">
+                                <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
                                     {questions.map((question, index) => {
                                         const isCurrent = index === currentQuestionIndex;
                                         const isAnswered = Boolean(selectedAnswers[String(question.id)]);
